@@ -1,0 +1,253 @@
+<template>
+  <div class="EditDialog">
+    <el-dialog title="编辑" :visible.sync="showDialog" width="1200px" center @close="down('Editlistform')">
+      <div class="editing">
+        <el-form
+          :model="dataObj"
+          ref="Editlistform"
+          size="medium"
+          label-width="90px"
+          label-position="left"
+          :rules="rules"
+        >
+          <div class="form_div">
+            <el-form-item label="标题：" prop="title">
+              <el-input v-model="dataObj.title" type="text" placeholder="标题" maxlength="30"></el-input>
+            </el-form-item>
+          </div>
+          <div class="form_div">
+            <el-form-item label="作者：" prop="author">
+              <el-input v-model="dataObj.author" type="text" placeholder="作者" maxlength="15"></el-input>
+            </el-form-item>
+          </div>
+          <div class="form_div">
+            <el-form-item label="摘要：" prop="description">
+              <el-input v-model="dataObj.description" type="text" placeholder="摘要" maxlength="100"></el-input>
+            </el-form-item>
+          </div>
+          <div class="form_div">
+            <el-form-item label="权重：" prop="homeRecommend">
+              <el-input v-model="dataObj.homeRecommend" type="text" placeholder="权重" maxlength="3"></el-input>
+            </el-form-item>
+          </div>
+          <div class="form_div1">
+            <el-form-item label="内容：" prop="content">
+              <el-upload
+                class="avatar-uploader quill-img"
+                action="/xd/comm/file/v2/upload"
+                :show-file-list="false"
+                :on-success="quillImgSuccess"
+                :before-upload="beforeAvatarUpload"
+              ></el-upload>
+              <quill-editor
+                v-model="dataObj.content"
+                ref="myQuillEditor"
+                :options="editorOption"
+                @blur="onEditorBlur($event)"
+                @focus="onEditorFocus($event)"
+                @change="onEditorChange($event)"
+              ></quill-editor>
+            </el-form-item>
+          </div>
+        </el-form>
+        <div class="submitBtn">
+          <el-button type="primary" :loading="loadingBtn" @click="editFuc('Editlistform')">修&nbsp;改</el-button>
+        </div>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { quillEditor } from "vue-quill-editor"; //调用编辑器
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+import { modify } from "@/api";
+import { isPercentage } from "@/flies/js/rules";
+const toolbarOptions = [
+  ["bold", "italic", "underline", "strike"], // toggled buttons
+  [{ header: 1 }, { header: 2 }], // custom button values
+  [{ list: "ordered" }, { list: "bullet" }],
+  [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
+  [{ direction: "rtl" }], // text direction
+  [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+  [{ font: [] }],
+  [{ align: [] }],
+  ["link", "image"],
+  ["clean"]
+];
+var validProjectName = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("该输入框不能为空！"));
+  } else {
+    callback();
+  }
+};
+var percentage = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("请输入小于100的整数"));
+  } else if (!isPercentage(value)) {
+    callback(new Error("请输入正确的格式！"));
+  } else {
+    callback();
+  }
+};
+export default {
+  components: {
+    quillEditor
+  },
+  data() {
+    return {
+      editorOption: {
+        placeholder: "请输入内容...",
+        modules: {
+          toolbar: {
+            container: toolbarOptions, // 工具栏
+            handlers: {
+              image: function(value) {
+                if (value) {
+                  // 触发input框选择图片文件
+                  document.querySelector(".quill-img input").click();
+                  console.log(value);
+                } else {
+                  this.quill.format("image", false);
+                }
+              }
+            }
+          }
+        }
+      },
+      loadingBtn: false,
+      showDialog: false,
+      dataObj: {},
+      rules: {
+        title: [{ hide: true, trigger: "blur", validator: validProjectName }],
+        author: [{ hide: true, trigger: "blur", validator: validProjectName }],
+        description: [
+          { hide: true, trigger: "blur", validator: validProjectName }
+        ],
+        homeRecommend: [{ hide: true, trigger: "blur", validator: percentage }]
+      }
+    };
+  },
+
+  methods: {
+    down(Editlistform){
+      this.$refs[Editlistform].resetFields();
+    },
+    quillImgSuccess(res, file) {
+      console.log(res, file);
+      let quill = this.$refs.myQuillEditor.quill;
+      console.log(quill);
+      if (res.error == 0) {
+        // 获取光标所在位置
+        let length = quill.getSelection().index;
+        // 插入图片  res.url为服务器返回的图片地址
+        quill.insertEmbed(length, "image", res.url);
+        console.log(res);
+        // 调整光标到最后
+        quill.setSelection(length + 1);
+      } else {
+        this.$message.error("图片插入失败");
+      }
+    },
+    beforeAvatarUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 1;
+      if (!isLt2M) {
+        this.$message.error("上传图片大小不能超过 1MB!");
+      }
+      return isLt2M;
+    },
+    //确定修改
+    editFuc(Editlistform) {
+      this.$refs[Editlistform].validate(valid => {
+        if (valid) {
+          // console.log(this.dataObj.content);
+          if (this.dataObj.content == "") {
+            this.$message({
+              showClose: true,
+              message: "请填写内容",
+              type: "warning"
+            });
+          } else {
+            this.$confirm("确定修改该需求?", "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "info"
+            })
+              .then(() => {
+                this.loadingBtn = true;
+                modify(this.dataObj)
+                  .then(res => {
+                    if (res.errorCode === 0) {
+                      this.showDialog = false;
+                      this.$emit("changeFuc");
+                      this.$message({
+                        showClose: true,
+                        message: "修改成功",
+                        type: "success"
+                      });
+                    }
+                    this.loadingBtn = false;
+                  })
+                  .catch(() => {
+                    this.loadingBtn = false;
+                  });
+              })
+              .catch(() => {
+                this.$message({
+                  type: "info",
+                  message: "已取消修改"
+                });
+              });
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+    showDialogFuc(type, data) {
+      console.log(data);
+      this.dataObj = data;
+      this.showDialog = true;
+    },
+    onEditorReady(editor) {
+      // 准备编辑器
+    },
+    onEditorBlur() {}, // 失去焦点事件
+    onEditorFocus() {}, // 获得焦点事件
+    onEditorChange({ quill, html, text }) {
+      console.log("editor change!", quill, html, text);
+      this.content = html;
+      console.log("editor change!", this.content);
+    } // 内容改变事件
+  },
+  computed: {
+    editor() {
+      return this.$refs.myQuillEditor.quill;
+    }
+  }
+};
+</script>
+
+<style scoped>
+.quill-editor {
+  height: 300px;
+}
+.editing {
+  width: 800px;
+  margin: auto;
+}
+.form_div1{
+  height: 350px;
+}
+.submitBtn {
+  width: 777px;
+  text-align: center;
+  padding-top: 100px;
+  box-sizing: border-box;
+}
+</style>

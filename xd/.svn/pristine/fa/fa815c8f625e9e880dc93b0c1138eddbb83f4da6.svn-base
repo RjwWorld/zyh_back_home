@@ -1,0 +1,217 @@
+<template>
+  <div class="addlist">
+    <el-form ref="ruleForm" :model="datobj">
+      <div class="form_div">
+        <el-form-item prop="age">
+          <p>1.你的年龄是:</p>
+          <el-radio-group v-model="datobj.age">
+            <el-radio :label="1">50-60</el-radio>
+            <el-radio :label="2">60-70</el-radio>
+            <el-radio :label="3">70-80</el-radio>
+            <el-radio :label="4">80以上</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="gender">
+          <p>2.你的性别是:</p>
+          <el-radio v-model="datobj.gender" label="男"></el-radio>
+          <el-radio v-model="datobj.gender" label="女"></el-radio>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="isUseWechat">
+          <p>3.你是否使用微信:</p>
+          <el-radio v-model="datobj.isUseWechat" label="是"></el-radio>
+          <el-radio v-model="datobj.isUseWechat" label="否"></el-radio>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="professionalList">
+          <p>4.你以前从事的职业是:</p>
+          <el-checkbox-group v-model="datobj.professionalList">
+            <el-checkbox label="企业/事业单位"></el-checkbox>
+            <el-checkbox label="经商"></el-checkbox>
+            <el-checkbox label="务农"></el-checkbox>
+            <el-checkbox label="其他"></el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="useLength">
+          <p>5.你每天使用手机的时长是:</p>
+          <el-radio-group v-model="datobj.useLength">
+            <el-radio :label="1">1小时以下</el-radio>
+            <el-radio :label="2">1-2小时</el-radio>
+            <el-radio :label="3">2-3小时</el-radio>
+            <el-radio :label="4">3小时以上</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="softwareDownload">
+          <p>6.你通过什么方式下载软件:</p>
+          <el-radio-group v-model="datobj.softwareDownload">
+            <el-radio label="家人朋友帮忙"></el-radio>
+            <el-radio label="自己下载"></el-radio>
+            <el-radio label="不使用软件"></el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="isUniversityAge">
+          <p>7.你是否了解老年大学:</p>
+          <el-radio-group v-model="datobj.isUniversityAge">
+            <el-radio label="是"></el-radio>
+            <el-radio label="否"></el-radio>
+            <el-radio label="在读"></el-radio>
+            <el-radio label="曾经在读"></el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="personalInterestsList">
+          <p>8.你个人兴趣爱好:</p>
+          <el-checkbox-group v-model="datobj.personalInterestsList">
+            <el-checkbox label="旅游"></el-checkbox>
+            <el-checkbox label="广场舞"></el-checkbox>
+            <el-checkbox label="太极"></el-checkbox>
+            <el-checkbox label="其他"></el-checkbox>
+            <el-input type="text" style="width:150px;" v-model="datobj.other"></el-input>
+          </el-checkbox-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="isAppDownload">
+          <p>9.如果有一款专门针对老年人业余生活的APP，你是否会下载:</p>
+          <el-radio-group v-model="datobj.isAppDownload">
+            <el-radio label="是"></el-radio>
+            <el-radio label="否"></el-radio>
+            <el-radio label="在读"></el-radio>
+            <el-radio label="曾经在读"></el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="learningModuleList">
+          <p>10.最想在APP上体验到什么功能:</p>
+          <p>学习板块：</p>
+          <el-checkbox-group v-model="datobj.learningModuleList">
+            <el-checkbox label="报名"></el-checkbox>
+            <el-checkbox label="收音机"></el-checkbox>
+            <el-checkbox label="网上课程"></el-checkbox>
+            <el-checkbox label="新闻"></el-checkbox>
+            <el-checkbox label="作业"></el-checkbox>
+            <el-checkbox label="作品展览"></el-checkbox>
+            <el-checkbox label="其他"></el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+       <el-form-item prop="cultureModuleList">
+            <p>文化板块：</p>
+          <el-checkbox-group v-model="datobj.cultureModuleList">
+            <el-checkbox label="琴"></el-checkbox>
+            <el-checkbox label="棋"></el-checkbox>
+            <el-checkbox label="书"></el-checkbox>
+            <el-checkbox label="画"></el-checkbox>
+            <el-checkbox label="太极"></el-checkbox>
+            <el-checkbox label="养身"></el-checkbox>
+            <el-checkbox label="旅游"></el-checkbox>
+            <el-checkbox label="摄影"></el-checkbox>
+            <el-checkbox label="广场舞"></el-checkbox>
+            <el-checkbox label="品茗"></el-checkbox>
+            <el-checkbox label="无需求"></el-checkbox>
+          </el-checkbox-group>
+       </el-form-item>
+         <el-form-item prop="healthModuleList">
+              <p>健康板块：</p>
+          <el-checkbox-group v-model="datobj.healthModuleList">
+            <el-checkbox label="保险"></el-checkbox>
+            <el-checkbox label="社保服务"></el-checkbox>
+            <el-checkbox label="挂号"></el-checkbox>
+            <el-checkbox label="康养"></el-checkbox>
+            <el-checkbox label="理疗"></el-checkbox>
+            <el-checkbox label="无需求"></el-checkbox>
+          </el-checkbox-group>
+         </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="isOfflineActivities">
+          <p>11.你是否愿意与在网上认识志同道合的陌生人一起参加线下活动:</p>
+          <el-radio v-model="datobj.isOfflineActivities" label="是"></el-radio>
+          <el-radio v-model="datobj.isOfflineActivities" label="否"></el-radio>
+        </el-form-item>
+      </div>
+      <div class="form_div">
+        <el-form-item prop="solveTheProblem">
+          <p>12.你希望通过软件解决你生活中什么样的问题？</p>
+          <el-input type="text" style="width:500px;" v-model="datobj.solveTheProblem"></el-input>
+        </el-form-item>
+      </div>
+    </el-form>
+    <div>
+      <el-button @click="add()" type="primary">确定</el-button>
+    </div>
+  </div>
+</template>
+
+<script>
+import looks from "@/components/add/look";
+import { addlist} from "@/api";
+export default {
+  components: {
+    looks
+  },
+  data() {
+    return {
+      open: false,
+      disabled: false,
+      datobj: {
+        age: "",
+        gender: "",
+        isUseWechat: "",
+        professionalList: [],
+        useLength: "",
+        softwareDownload: "",
+        isUniversityAge: "",
+        personalInterestsList: [],
+        isAppDownload: "",
+        learningModuleList: [],
+        cultureModuleList: [],
+        healthModuleList: [],
+        isOfflineActivities: "",
+        solveTheProblem: "",
+        other: ""
+      }
+    };
+  },
+  methods: {
+    add() {
+      if (this.datobj.age != "") {
+        addlist(this.datobj)
+          .then(res => {
+            if (res && res.errorCode == 0) {
+              this.$message({
+                showClose: true,
+                message: "添加成功",
+                type: "success"
+              });
+            }
+            this.$refs.ruleForm.resetFields();
+            this.datobj.other="";
+          })
+          .catch(() => {});
+      } else {
+        this.$message({
+          showClose: true,
+          message: "请填写信息",
+          type: "success"
+        });
+      }
+    },
+  }
+};
+</script>
+
+<style>
+</style>
+

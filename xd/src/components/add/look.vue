@@ -1,0 +1,213 @@
+<template>
+  <div class="look-container">
+    <div class="title">调查问卷</div>
+    <div class="box1">
+      <p class="title2">1、您的年龄是：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(v,k) in showDataObj[0]">
+          <span class="box2-title">{{k}}</span>
+          <span class="box2-num">{{v}}</span>
+        </p>
+        <!--<p class="box2">-->
+          <!--<span class="box2-title">60-70</span>-->
+          <!--<span class="box2-num"></span>-->
+        <!--</p>-->
+        <!--<p class="box2">-->
+          <!--<span class="box2-title">70-80</span>-->
+          <!--<span class="box2-num"></span>-->
+        <!--</p>-->
+        <!--<p class="box2">-->
+          <!--<span class="box2-title">80以上</span>-->
+          <!--<span class="box2-num"></span>-->
+        <!--</p>-->
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">2、您的性别是：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[1]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+        <!--<p class="box2">-->
+          <!--<span class="box2-title">女</span>-->
+          <!--<span class="box2-num"></span>-->
+        <!--</p>-->
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">3、您是否使用微信：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[2]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+        <!--<p class="box2">-->
+          <!--<span class="box2-title">否</span>-->
+          <!--<span class="box2-num"></span>-->
+        <!--</p>-->
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">4、您以前从事的职业是：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[3]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">5、您每天使用手机时长大概为：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[4]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">6、您通过什么方式下载软件：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[5]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">7、您是否了解老年人大学：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[6]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">8、您个人兴趣爱好：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[7]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">9、如果有一款专门针对于老年人业余生活的APP,你是否会下载：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[8]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">10、最想在APP上体验到什么功能：</p>
+      <p class="title3">学习板块：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[9]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+      <p class="title3">文化板块：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[10]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+      <p class="title3">健康板块：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[11]">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1" style="padding-top: 20px;">
+      <p class="title2">11、您是否愿意与在网上认识的志同道合的陌生人一起参加线下活动：</p>
+      <div class="big-box2">
+        <p class="box2" v-for="(item,index) in showDataObj[12]" :key="index">
+          <span class="box2-title">{{index}}</span>
+          <span class="box2-num">{{item}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="box1">
+      <p class="title2">12、您希望通过软件解决您生活中什么问题？</p>
+      <p class="btn-show" @click="looklook=true">查看</p>
+    </div>
+     <el-dialog title="您希望通过软件解决您生活中什么问题？" :visible.sync="looklook" width="1200px"  center append-to-body>
+        <ol class="ol-style">
+          <li v-for="(item,index) in showDataObj" :key="index" v-show="index>12&&item!=''">{{item}}</li>
+        </ol>
+      </el-dialog>
+  </div>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        looklook: false,
+      }
+    },
+    props: {
+      showDataObj: {
+        type: Array
+      },
+    },
+  }
+</script>
+
+<style scoped lang="less">
+  .ol-style{
+    width: 900px;
+    margin: 0 auto;
+    li{
+      padding-top: 20px;
+    }
+  }
+  .look-container{
+    .title{
+      font-size: 22px;
+      color: black;
+      font-weight: bold;
+      text-align: center;
+      margin: 30px 0;
+    }
+    .box1{
+      margin-top: 20px;
+      height: 50px;
+      clear: left;
+      .btn-show{
+        color: blue;
+        cursor: pointer;
+        margin-left: 28px;
+      }
+      .title2{
+        margin: 10px 0;
+        font-weight: bold;
+      }
+      .title3{
+        clear: left;
+        padding-top: 10px;
+        padding-bottom: 5px;
+      }
+      .big-box2{
+        .box2{
+          float: left;
+          margin-left: 28px;
+          .box2-num{
+            border-bottom: 1px solid black;
+            width: 40px;
+            display: inline-block;
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+</style>

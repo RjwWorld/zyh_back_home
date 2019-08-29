@@ -1,0 +1,645 @@
+<template>
+  <div class="businesslist">
+    <div class="screening">
+      <el-form :inline="true" class="demo-form-inline">
+        <el-form-item label="项目分类：">
+          <el-select
+            v-model="tableObj.projectClassification"
+            @change="changeFuc('page',1)"
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in initSelectData.projectClassList"
+              :key="item.text"
+              :label="item.text"
+              :value="item.text"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态：">
+          <el-select @change="changeFuc('page',1)" placeholder="请选择" v-model="tableObj.status">
+            <el-option
+              v-for="item in initSelectData.Consultstate"
+              :key="item.code"
+              :label="item.text"
+              :value="item.code"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-input
+            @keyup.enter.native="changeFuc('page',1)"
+            placeholder="编号、标题关键字"
+            v-model="tableObj.keyWord"
+            clearable
+          ></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            @click="changeFuc('page',1)"
+            :loading="loadingBtn"
+            icon="el-icon-search"
+            style="background-color: #FF8800;border:0;"
+          >查&nbsp;询</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            @click="open=true"
+            style="background-color: #0ECC47;border:0;"
+          >添&nbsp;加</el-button>
+          <el-dialog
+            title="项目添加"
+            :visible.sync="open"
+            width="1200px"
+            center
+            @close="resab('newslistform')"
+          >
+            <div class="InformationAdd">
+              <div class="newslistform">
+                <el-form
+                  :model="dataObj"
+                  label-position="right"
+                  ref="newslistform"
+                  size="medium"
+                  label-width="90px;"
+                  :rules="rules"
+                >
+                  <div class="form_div">
+                    <el-form-item label="标题：" prop="title">
+                      <el-input
+                        v-model="dataObj.title"
+                        type="text"
+                        placeholder="标题"
+                        style="width:540px;"
+                        maxlength="30"
+                      ></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="form_div2">
+                    <el-form-item label="项目分类：" prop="projectClassification">
+                      <!-- <el-input
+                        v-model="dataObj.projectClassification"
+                        type="text"
+                        placeholder="项目分类"
+                        style="width:540px;"
+                      ></el-input>-->
+                      <el-select v-model="dataObj.projectClassification" placeholder="请选择">
+                        <el-option v-for="item in dropd" :key="item" :label="item" :value="item"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="form_div">
+                    <el-form-item label="摘要：" prop="description">
+                      <el-input
+                        v-model="dataObj.description"
+                        type="textarea"
+                        placeholder="摘要"
+                        style="width:540px;"
+                        rows="6"
+                        maxlength="100"
+                        @input="descInput"
+                      ></el-input>
+                      <span class="xianzhi">{{remnant}}/100</span>
+                    </el-form-item>
+                  </div>
+                  <div class="form_div3">
+                    <el-form-item label="权重：" prop="homeRecommend">
+                      <el-input
+                        v-model="dataObj.homeRecommend"
+                        type="text"
+                        placeholder="权重0~100"
+                        style="width:540px;"
+                        maxlength="3"
+                      ></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="form_div1">
+                    <el-form-item label="图片：" prop="coverImgUrl">
+                      <upload-img
+                        :type="{type:'coverImgUrl'}"
+                        :showImage="dataObj.coverImgUrl"
+                        @uploadFuc="uploadFuc"
+                      />
+                    </el-form-item>
+                  </div>
+                  <div class="form_divv">
+                    <el-form-item label="内容：">
+                      <el-upload
+                        class="avatar-uploader quill-img"
+                        action="/xd/comm/file/v2/upload"
+                        :show-file-list="false"
+                        :on-success="quillImgSuccess"
+                        :before-upload="beforeAvatarUpload"
+                      ></el-upload>
+                      <quill-editor
+                        v-model="dataObj.content"
+                        ref="myQuillEditor"
+                        :options="editorOption"
+                        @blur="onEditorBlur($event)"
+                        @focus="onEditorFocus($event)"
+                        @change="onEditorChange($event)"
+                      ></quill-editor>
+                    </el-form-item>
+                  </div>
+                </el-form>
+              </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="previeFuc('newslistform')">预览</el-button>
+              <el-button @click="resetForm('newslistform')">重置</el-button>
+            </span>
+          </el-dialog>
+        </el-form-item>
+      </el-form>
+    </div>
+    <table-list
+      :tableHeader="tableHeader"
+      :tableData="tableData"
+      @operation="operation"
+      @changeFuc="changeFuc"
+    />
+    <businessview ref="lookDialog" @subFuc="subFuc" />
+    <Businessedit ref="editDialog" />
+  </div>
+</template>
+
+<script>
+import {
+  businesslist,
+  businessdtl,
+  businessadd,
+  businessdelById,
+  businessmodifyStatus,
+  upload
+} from "@/api";
+import TableList from "@/components/Table/table";
+import allTableHeader from "@/flies/js/tableHeader";
+import UploadImg from "@/components/uploadImg/uploadImg";
+import cloneObj from "@/flies/js/cloneObj";
+import { Consultstate, projectClassList, dropd } from "@/flies/js/initData";
+import businessview from "@/components/businesssector/businessview";
+import Businessedit from "@/components/businesssector/Businessedit";
+import { quillEditor } from "vue-quill-editor"; //调用编辑器
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+import { isPercentage } from "@/flies/js/rules";
+const toolbarOptions = [
+  ["bold", "italic", "underline", "strike"], // toggled buttons
+  [{ header: 1 }, { header: 2 }], // custom button values
+  [{ list: "ordered" }, { list: "bullet" }],
+  [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
+  [{ direction: "rtl" }], // text direction
+  [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+  [{ font: [] }],
+  [{ align: [] }],
+  ["link", "image"],
+  ["clean"]
+];
+var validProjectName = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("该输入框不能为空！"));
+  } else {
+    callback();
+  }
+};
+var validConstruction = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("请选择！"));
+  } else {
+    callback();
+  }
+};
+var percentage = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("请输入小于100的整数"));
+  } else if (!isPercentage(value)) {
+    callback(new Error("请输入正确的格式！"));
+  } else {
+    callback();
+  }
+};
+var validImg = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("该图片为必填！"));
+  } else {
+    callback();
+  }
+};
+export default {
+  components: {
+    TableList,
+    businessview,
+    quillEditor,
+    UploadImg,
+    Businessedit
+  },
+  data() {
+    return {
+      editorOption: {
+        placeholder: "请输入内容...",
+        modules: {
+          toolbar: {
+            container: toolbarOptions, // 工具栏
+            handlers: {
+              image: function(value) {
+                if (value) {
+                  // 触发input框选择图片文件
+                  document.querySelector(".quill-img input").click();
+                  console.log(value);
+                } else {
+                  this.quill.format("image", false);
+                }
+              }
+            }
+          }
+        }
+      },
+      remnant: 100,
+      open: false,
+      loadingBtn: false,
+      showImg: "",
+      tableObj: {
+        keyWord: "",
+        projectClassification: "全部",
+        status: null,
+        pageSize: 10,
+        startPage: 1
+      },
+      initSelectData: {
+        Consultstate,
+        projectClassList
+      },
+      dropd,
+      tableData: {},
+      tableHeader: allTableHeader.businessheader,
+      dataObj: {
+        title: "", //标题
+        projectClassification: "",
+        homeRecommend: "", //权重
+        content: "", //内容
+        description: "", //摘要
+        coverImgUrl: "",
+        ImgUrl: ""
+      },
+      freeDataObj: {}, //上传的对象
+      rules: {
+        title: [{ hide: true, trigger: "blur", validator: validProjectName }],
+        description: [
+          { hide: true, trigger: "blur", validator: validProjectName }
+        ],
+        homeRecommend: [{ hide: true, trigger: "blur", validator: percentage }],
+        projectClassification: [
+          { hide: true, trigger: "change", validator: validConstruction }
+        ]
+        // coverImgUrl: [
+        //   {hide: true, trigger: 'blur', validator: validImg}
+        // ],
+      }
+    };
+  },
+  created() {
+    this.initWeb();
+  },
+  methods: {
+    resab(newslistform) {
+      this.$refs[newslistform].resetFields();
+    },
+    descInput() {
+      this.remnant = 100 - this.dataObj.description.length;
+    },
+    quillImgSuccess(res, file) {
+      console.log(res, file);
+      let quill = this.$refs.myQuillEditor.quill;
+      console.log(quill);
+      if (res.error == 0) {
+        // 获取光标所在位置
+        let length = quill.getSelection().index;
+        // 插入图片  res.url为服务器返回的图片地址
+        quill.insertEmbed(length, "image", res.url);
+        // 调整光标到最后
+        quill.setSelection(length + 1);
+      } else {
+        this.$message.error("图片插入失败");
+      }
+    },
+    beforeAvatarUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 1;
+      if (!isLt2M) {
+        this.$message.error("上传图片大小不能超过 1MB!");
+      }
+      return isLt2M;
+    },
+    //发布
+    subFuc() {
+      if (this.freeDataObj.content == "") {
+        this.$message({
+          showClose: true,
+          message: "内容不能为空",
+          type: "warning"
+        });
+      }
+      if (this.freeDataObj.coverImgUrl == "") {
+        this.$message({
+          showClose: true,
+          message: "图片不能为空",
+          type: "warning"
+        });
+      } else {
+        businessadd({
+          coverImgUrl: this.dataObj.ImgUrl,
+          content: this.freeDataObj.content,
+          description: this.freeDataObj.description,
+          homeRecommend: this.freeDataObj.homeRecommend,
+          projectClassification: this.freeDataObj.projectClassification,
+          title: this.freeDataObj.title
+        })
+          .then(res => {
+            if (res && res.errorCode == 0) {
+              this.$message({
+                showClose: true,
+                message: "发布成功",
+                type: "success"
+              });
+              this.resetForm("newslistform");
+              this.initWeb();
+              this.open = false;
+              this.remnant = 100;
+            }
+            this.$refs.lookDialog.closeFuc();
+          })
+          .catch(() => {
+            this.$refs.lookDialog.closeLoadingFuc();
+          });
+      }
+    },
+    //预览按钮
+    previeFuc(newslistform) {
+      this.$refs[newslistform].validate(valid => {
+        if (valid) {
+          this.mergeFuc();
+        } else {
+          return false;
+        }
+      });
+    },
+    mergeFuc(data) {
+      let dataObjC = cloneObj(this.dataObj);
+      let dataC = cloneObj(data);
+      let mergeObj = Object.assign(dataObjC, dataC);
+      // console.log(mergeObj)
+      this.freeDataObj = cloneObj(mergeObj);
+      // console.log(freeDataObj)
+      this.$refs.lookDialog.showDialogFuc("submit", mergeObj);
+    },
+    // delImg(index, more) {
+    //   this.coverImgUrl.splice(index, 1);
+    // },
+    //重置按钮
+    resetForm(formName) {
+      this.checkedM = false;
+      this.dataObj.title = "";
+      this.dataObj.content = "";
+      (this.dataObj.projectClassification = ""),
+        (this.dataObj.homeRecommend = ""),
+        (this.dataObj.description = ""),
+        (this.coverImgUrl = "");
+      this.$refs[formName].resetFields();
+      this.remnant = 100;
+    },
+    uploadFuc(data, more, type) {
+      upload(data).then(res => {
+        console.log(res);
+        if (res && res.errorCode === 0) {
+          //  if (more) {
+          //     this.showImg.push(res.body.filePath);
+          //     this.dataObj.imageList=res.body.fileId;
+          //   }
+          console.log(more);
+          let typeType = type.type;
+          switch (typeType) {
+            case "coverImgUrl":
+              this.dataObj.coverImgUrl = res.body.filePath;
+              this.dataObj.ImgUrl = res.body.fileId;
+              break;
+          }
+        }
+      });
+    },
+    onEditorReady(editor) {
+      // 准备编辑器
+    },
+    onEditorBlur() {}, // 失去焦点事件
+    onEditorFocus() {}, // 获得焦点事件
+    onEditorChange({ quill, html, text }) {
+      console.log("editor change!", quill, html, text);
+      this.content = html;
+      console.log("editor change!", this.content);
+    }, // 内容改变事件
+
+    operation(type, data) {
+      console.log(type, data);
+      let obj;
+      switch (type) {
+        case "up":
+          obj = {
+            id: data.id,
+            status: 2
+          };
+          this.$confirm("确定发布该项目?", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消"
+          })
+            .then(() => {
+              businessmodifyStatus(obj).then(res => {
+                if (res && res.errorCode == 0) {
+                  this.changeFuc();
+                  this.$message({
+                    showClose: true,
+                    message: "发布成功",
+                    type: "success"
+                  });
+                }
+              });
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "取消操作"
+              });
+            });
+          break;
+        case "down":
+          obj = {
+            id: data.id,
+            status: 0
+          };
+          this.$confirm("确定下架该项目?", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消"
+          })
+            .then(() => {
+              businessmodifyStatus(obj).then(res => {
+                if (res && res.errorCode == 0) {
+                  this.changeFuc();
+                  this.$message({
+                    showClose: true,
+                    message: "下架成功",
+                    type: "success"
+                  });
+                }
+              });
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "取消操作"
+              });
+            });
+          break;
+        case "del":
+          obj = {
+            id: data.id
+          };
+          this.$confirm("确定删除该项目?", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+          })
+            .then(() => {
+              businessdelById(obj).then(res => {
+                if (res && res.errorCode === 0) {
+                  this.changeFuc();
+                  this.$message({
+                    showClose: true,
+                    message: "删除成功",
+                    type: "success"
+                  });
+                }
+              });
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "取消操作"
+              });
+            });
+          break;
+        case "look":
+          businessdtl({ id: data.id }).then(res => {
+            if (res && res.errorCode === 0) {
+              this.$refs.lookDialog.showDialogFuc("look", res.body);
+            }
+          });
+          break;
+        case "edit":
+          businessdtl({ id: data.id }).then(res => {
+            if (res && res.errorCode === 0) {
+              console.log(res);
+              this.$refs.editDialog.showDialogFuc("edit", res.body);
+            }
+          });
+          break;
+      }
+    },
+    changeFuc(type, value) {
+      this.loadingBtn = true;
+      if (type == "page") {
+        this.tableObj.startPage = value;
+      }
+      businesslist(this.tableObj)
+        .then(res => {
+          if (res && res.errorCode == 0) {
+            this.loadingBtn = false;
+            this.tableData = res.body;
+            console.log(this.tableData);
+          }
+        })
+        .catch();
+    },
+    initWeb() {
+      this.changeFuc();
+      //初始化项目选项数据
+      // latestNew({}).then(res => {
+      //   if (res && res.errorCode === 0) {
+      //     console.log(res);
+      //   }
+      // });
+    }
+  },
+  computed: {
+    editor() {
+      return this.$refs.myQuillEditor.quill;
+    }
+  }
+};
+</script>
+
+<style scoped>
+.quill-editor {
+  height: 200px;
+  width: 540px;
+}
+.form_divv{
+display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+  height: 300px;
+}
+.xianzhi {
+  position: absolute;
+  right: 0;
+}
+.form_div1 {
+  padding-left: 272px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+.form_div2 {
+  padding-left: 245px;
+  margin-bottom: 20px;
+}
+.businesslist {
+  background-color: #fff;
+  padding: 40px 196px 100px 55px;
+  box-sizing: border-box;
+  height: 800px;
+}
+.screening {
+  width: 1100px;
+  height: 80px;
+}
+.el-dialog__body {
+  text-align: center;
+}
+.el-form-item {
+  margin-bottom: 20px;
+}
+.el-dialog--center {
+  height: 900px !important;
+}
+.el-dialog__footer{
+  border: 1px solid red !important;
+}
+.form_div {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.form_div3 {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.el-form-item__content {
+  margin: 0 !important;
+}
+</style>
